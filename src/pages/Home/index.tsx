@@ -1,21 +1,62 @@
-import { Header } from "../../components/Header";
-import HeroImg from "../../assets/businessman.png"
+import { useEffect, useState } from "react"
 
 export function Home() {
+
+    interface IUser {
+        login: string,
+        password: string
+    }
+
+    const [userList, setUserList] = useState<IUser[]>([])
+
+    const [login, setLogin] = useState<string>("")
+    const [password, setPassword] = useState<string>("")
+
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault()
+        
+        const newUser: IUser = {login, password}
+        setUserList(prevUserList => [... prevUserList, newUser])
+    }
+
+    useEffect( () => {
+        const localUserList = localStorage.getItem('@userList')
+        if(localUserList) {
+            setUserList(JSON.parse(localUserList))
+        }
+    }, [])
+
+    useEffect( () => {
+        if (userList.length > 0) {
+            localStorage.setItem('@userList', JSON.stringify(userList))
+        } 
+    }, [userList])
+
     return (
         <>
-            <body className="w-full h-full">
-                <Header/>
-                <section className="flex items-center justify-center gap-16 border-2 border-red-500">
-                    <div>
-                        <h1 className="text-4xl text-center"> TEXTO DE EXEMPLO </h1>
-                        <p className="text-center"> Lorem ipsum dolor, sit amet consectetur adipisicing elit. Ratione, provident. Architecto assumenda mollitia itaque ratione enim aperiam? Ullam nisi autem ab nulla ad qui. Velit officia quod dignissimos quasi tempore?</p>
-                    </div>
-                    <div>
-                        <img className="" src={HeroImg}></img>
-                    </div>
-                </section>
-            </body>
+            <div className="h-screen flex items-center justify-center">
+                <form className="flex flex-col gap-4 items-center justify-center border-2 border-gray-500 shadow h-60 w-96" onSubmit={(event) => handleSubmit(event)}>
+                    <div className="flex justify-between items-center w-full px-10">
+                            <label className="flex justify-between items-center font-bold"> Login </label>
+                            <input className="mx-4 border-2 border-gray-300 px-1" type="text" name="login" onChange={(event) => setLogin(event.target.value)}/>
+                        </div>
+                        <div className="flex justify-between items-center w-full px-10">
+                            <label className="flex justify-between items-center font-bold"> Password </label>
+                            <input className="mx-4 border-2 border-gray-300 px-1" type="password" name="login" onChange={(event) => setPassword(event.target.value)}/>
+                        </div>
+                        <div className="flex gap-6">
+                            <button className="mt-6 border-2 border-gray-500 h-12 w-24 font-bold" onClick={(event) => handleSubmit(event)}> Entrar </button>
+                            <button className="mt-6 border-2 border-gray-500 h-12 w-24 font-bold"> Cancelar </button>
+                        </div>
+                </form>
+            </div>
+            <div>
+               {
+                userList && userList.map( (user:IUser, index:number) => (
+                    <li key={index}> {`Login: ${user.login} / Password: ${user.password}`} </li>
+                ))
+               }
+            </div>
         </>
     )
 }
